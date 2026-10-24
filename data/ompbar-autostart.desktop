@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ompbar daemon
+Comment=Start the ompbar quick-entry daemon
+Exec=/usr/bin/sh -c "$HOME/.local/bin/ompbar --daemon"
+Icon=system-search
+Terminal=false
+StartupNotify=false
+X-KDE-autostart-after=panel

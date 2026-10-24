@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ompbar
+GenericName=Quick question bar for omp
+Comment=Ask the omp coding agent from a Plasma overlay
+Exec=/usr/bin/sh -c "$HOME/.local/bin/ompbar toggle"
+Icon=system-search
+Terminal=false
+StartupNotify=false
+Categories=Utility;
+X-KDE-GlobalAccel-CommandShortcut=true

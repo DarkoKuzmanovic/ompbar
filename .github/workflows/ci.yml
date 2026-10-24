@@ -1,0 +1,29 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  ruff:
+    name: Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # The floating v4 tag is absent; v4.1.0 is the latest verified v4 release.
+      - uses: astral-sh/ruff-action@v4.1.0
+        with:
+          args: check
+      - run: ruff format --check .
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install pytest
+      # GUI, layer-shell, and KGlobalAccel paths require a KDE Plasma Wayland session and cannot run on CI.
+      - run: pytest -q
