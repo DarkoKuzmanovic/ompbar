@@ -36,7 +36,8 @@ class NDJSONParser:
             return
         try:
             value = json.loads(line)
-        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        # ValueError also covers JSONDecodeError, UnicodeDecodeError and huge ints.
+        except (ValueError, RecursionError) as exc:
             errors.append(f"Invalid omp event: {exc}")
             return
         if not isinstance(value, dict):

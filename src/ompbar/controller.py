@@ -200,7 +200,8 @@ class BarController(QObject):
                 self._set_error("Neither tern nor konsole is available.")
                 return
         args = ["-e", str(OMP), "-r", self._session_id]
-        if not QProcess.startDetached(program, args, str(self._cwd)):
+        started, _pid = QProcess.startDetached(program, args, str(self._cwd))
+        if not started:
             self._set_error(f"Could not launch {program}.")
 
     @Slot()
@@ -213,7 +214,11 @@ class BarController(QObject):
 
     @Slot(str)
     def setCwd(self, directory: str) -> None:
-        path = Path(directory).expanduser()
+        try:
+            path = Path(directory).expanduser()
+        except RuntimeError:  # ~name for a user that does not exist
+            self._set_error(f"Folder not found: {directory}")
+            return
         if not path.is_absolute():
             path = self._cwd / path
         path = path.resolve()

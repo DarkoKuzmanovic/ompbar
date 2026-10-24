@@ -96,3 +96,17 @@ def test_stop_timer_does_not_kill_the_next_turn(bar):
     # The stopped turn exits at once; the next one must outlive the 1.2 s kill timer.
     answer, _, error = run_turn(bar, lambda: bar.submit("late"))
     assert (answer, error) == ("ok", "")
+
+
+def test_unknown_user_home_in_set_cwd_is_an_inline_error(bar):
+    bar.setCwd("~ompbar_no_such_user")
+    assert bar.errorText.startswith("Folder not found:")
+
+
+def test_terminal_launch_failure_is_reported(bar, monkeypatch):
+    bar._session_id = "session"
+    monkeypatch.setattr(
+        controller_module.shutil, "which", lambda name: "/nonexistent/tern"
+    )
+    bar.openInTerminal()
+    assert bar.errorText == "Could not launch /nonexistent/tern."

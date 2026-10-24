@@ -41,7 +41,7 @@ Window {
     // ---- layer-shell placement -------------------------------------------
     LayerShell.Window.layer: LayerShell.Window.LayerOverlay
     LayerShell.Window.anchors: LayerShell.Window.AnchorTop
-    LayerShell.Window.margins: Qt.margins(0, Math.max(0, root.topGap - root.shadowPad), 0, 0)
+    LayerShell.Window.margins.top: Math.max(0, root.topGap - root.shadowPad)
     LayerShell.Window.exclusionZone: -1
     LayerShell.Window.wantsToBeOnActiveScreen: true
     LayerShell.Window.activateOnShow: true

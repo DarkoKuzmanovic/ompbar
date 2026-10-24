@@ -26,10 +26,13 @@ def parse_prompt(text: str, cwd: Path) -> ParsedPrompt:
     if match is None:
         return ParsedPrompt(value, cwd)
 
-    requested = Path(match.group(1)).expanduser()
+    question = (match.group(2) or "").strip()
+    try:
+        requested = Path(match.group(1)).expanduser()
+    except RuntimeError:  # ~name for a user that does not exist
+        return ParsedPrompt(question, cwd, f"Folder not found: {match.group(1)}")
     directory = requested if requested.is_absolute() else cwd / requested
     directory = directory.resolve()
-    question = (match.group(2) or "").strip()
     if not directory.is_dir():
         return ParsedPrompt(question, cwd, f"Folder not found: {directory}")
     if not question:

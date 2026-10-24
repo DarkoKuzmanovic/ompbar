@@ -73,3 +73,16 @@ def test_omp_uses_path_then_bun_fallback(tmp_path: Path) -> None:
     assert resolve_omp_executable({"HOME": str(home), "PATH": ""}) == (
         home / ".bun" / "bin" / "omp"
     )
+
+
+def test_broken_config_falls_back_to_home(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    config = tmp_path / "config" / "ompbar" / "config.ini"
+    config.parent.mkdir(parents=True)
+    env = {"HOME": str(home), "XDG_CONFIG_HOME": str(tmp_path / "config")}
+    for text in (
+        "default_cwd = ~/no-section-header\n",
+        "[ompbar]\ndefault_cwd = ~ompbar_no_such_user/x\n",
+    ):
+        config.write_text(text, encoding="utf-8")
+        assert resolve_default_cwd(env) == home

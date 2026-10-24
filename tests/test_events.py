@@ -26,3 +26,12 @@ def test_parser_flushes_unterminated_final_record() -> None:
     parser = NDJSONParser()
     assert parser.feed(b'{"type":"session"}') == ([], [])
     assert parser.finish() == ([{"type": "session"}], [])
+
+
+def test_parser_reports_huge_numbers_and_deep_nesting() -> None:
+    parser = NDJSONParser()
+    huge = b'{"n":' + b"9" * 5000 + b"}"
+    deep = b"[" * 100_000 + b"]" * 100_000
+    events, errors = parser.feed(huge + b"\n" + deep + b'\n{"type":"agent_end"}\n')
+    assert events == [{"type": "agent_end"}]
+    assert len(errors) == 2

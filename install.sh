@@ -9,13 +9,14 @@ APP_ID=org.ompbar.desktop
 SHORTCUT=Meta+Alt+Space
 SHORTCUT_KEY=402653216 # Qt::META | Qt::ALT | Qt::Key_Space
 
-for tool in python3 kwriteconfig6 kreadconfig6 qdbus6 gdbus kbuildsycoca6; do
+for tool in kwriteconfig6 kreadconfig6 qdbus6 gdbus kbuildsycoca6; do
     command -v "$tool" >/dev/null 2>&1 || {
         printf 'Required command not found: %s\n' "$tool" >&2
         exit 1
     }
 done
-python3 -c 'import PySide6' || {
+# Must match the interpreter bin/ompbar runs.
+/usr/bin/python3 -c 'import PySide6' || {
     printf 'System Python PySide6 is required.\n' >&2
     exit 1
 }

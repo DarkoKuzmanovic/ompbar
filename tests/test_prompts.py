@@ -46,3 +46,9 @@ def test_empty_prompt_is_rejected(tmp_path: Path) -> None:
     assert result.prompt == ""
     assert result.cwd == tmp_path
     assert result.error == "Enter a question."
+
+
+def test_unknown_user_home_is_an_inline_error(tmp_path: Path) -> None:
+    result = parse_prompt("@~ompbar_no_such_user question", tmp_path)
+    assert result.cwd == tmp_path
+    assert result.error.startswith("Folder not found:")

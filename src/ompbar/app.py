@@ -59,7 +59,7 @@ class ControlServer:
             del buffer[: end + 1]
             try:
                 request = json.loads(line)
-            except (UnicodeDecodeError, json.JSONDecodeError):
+            except (ValueError, RecursionError):
                 _write_response(socket, {"ok": False, "error": "Invalid request."})
                 continue
             self._handle(socket, request)
@@ -167,7 +167,7 @@ def _send_request(request: dict, timeout_ms: int = 5000) -> dict | None:
         if end >= 0:
             try:
                 return json.loads(response[:end])
-            except (UnicodeDecodeError, json.JSONDecodeError):
+            except (ValueError, RecursionError):
                 return {"ok": False, "error": "ompbar returned an invalid response."}
     if socket.state() != QLocalSocket.LocalSocketState.ConnectedState:
         return {"ok": False, "error": "ompbar disconnected before replying."}

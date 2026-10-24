@@ -1,7 +1,7 @@
 import os
 import shutil
 from collections.abc import Mapping
-from configparser import ConfigParser
+from configparser import ConfigParser, Error
 from pathlib import Path
 
 
@@ -27,9 +27,13 @@ def resolve_default_cwd(environ: Mapping[str, str] | None = None) -> Path:
         _expand_user_path(config_home, home) if config_home else home / ".config"
     )
     parser = ConfigParser(interpolation=None)
-    parser.read(config_dir / "ompbar" / "config.ini", encoding="utf-8")
-    configured_cwd = parser.get("ompbar", "default_cwd", fallback="")
-    return _expand_user_path(configured_cwd, home) if configured_cwd else home
+    try:
+        parser.read(config_dir / "ompbar" / "config.ini", encoding="utf-8")
+        configured_cwd = parser.get("ompbar", "default_cwd", fallback="")
+        return _expand_user_path(configured_cwd, home) if configured_cwd else home
+    except (Error, UnicodeDecodeError, RuntimeError):
+        # shortcut: a broken config silently means home; report it if that confuses users.
+        return home
 
 
 def resolve_omp_executable(environ: Mapping[str, str] | None = None) -> Path:
