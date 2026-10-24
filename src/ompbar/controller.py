@@ -11,6 +11,7 @@ from .paths import resolve_default_cwd, resolve_omp_executable
 from .prompts import parse_prompt
 
 OMP = resolve_omp_executable()
+DISCARDED = "Discarded by New conversation."
 
 
 class BarController(QObject):
@@ -156,7 +157,8 @@ class BarController(QObject):
         self._cancelled = True
         self._set_status("Stopping…")
         self._process.terminate()
-        QTimer.singleShot(1200, self._kill_if_running)
+        process = self._process
+        QTimer.singleShot(1200, lambda: self._kill_if_running(process))
 
     @Slot()
     def newConversation(self) -> None:
@@ -336,16 +338,19 @@ class BarController(QObject):
                 self._handle_event(event)
         stderr = bytes(self._stderr).decode("utf-8", errors="replace").strip()
         discarded = self._discard_current
+        # Callers (ompbar ask) treat an empty error as success, so stopped turns need one.
+        turn_error = ""
         if discarded:
             self._set_status("Ready")
+            turn_error = DISCARDED
         elif self._cancelled:
             self._set_status("Stopped")
+            turn_error = "Stopped before omp finished."
         elif exit_code != 0:
             self._set_error(stderr or f"omp exited with code {exit_code}.")
             self._set_status("Failed")
         else:
-            if stderr:
-                self._set_error(stderr)
+            # stderr on a clean exit is warnings only; the answer still succeeded.
             self._set_status("Complete")
             if not self._current_answer and not self._error_text:
                 self._set_error("omp finished without a text response.")
@@ -360,7 +365,7 @@ class BarController(QObject):
         self.turnFinished.emit(
             self._current_answer,
             self._session_id,
-            self._error_text,
+            turn_error or self._error_text,
         )
 
     def _process_error(self, error) -> None:
@@ -384,12 +389,16 @@ class BarController(QObject):
             self.turnFinished.emit(
                 "",
                 self._session_id,
-                "" if discarded else message,
+                DISCARDED if discarded else message,
             )
 
-    def _kill_if_running(self) -> None:
-        if self._process and self._process.state() != QProcess.ProcessState.NotRunning:
-            self._process.kill()
+    def _kill_if_running(self, process: QProcess) -> None:
+        # Only the turn that was stopped; a finished one may already be deleted.
+        if (
+            process is self._process
+            and process.state() != QProcess.ProcessState.NotRunning
+        ):
+            process.kill()
 
     def _update_elapsed(self) -> None:
         self._set_elapsed(self._format_elapsed())

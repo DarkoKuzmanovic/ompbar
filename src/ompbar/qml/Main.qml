@@ -60,7 +60,9 @@ Window {
             return
         flick.follow = true
         bar.submit(question)
-        prompt.clear()
+        // A rejected question (bad @folder etc.) stays in the box for editing.
+        if (bar.busy)
+            prompt.clear()
     }
 
     function stopOrClose() {

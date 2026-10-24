@@ -79,7 +79,7 @@ Run the Qt-free unit tests with:
 uv run --no-project --with pytest pytest -q
 ```
 
-The tests exercise prompt parsing, event-stream parsing, and path resolution without importing PySide6 or requiring a display.
+The tests exercise prompt parsing, event-stream parsing, and path resolution without importing PySide6 or requiring a display. `tests/test_controller.py` drives the controller against a stub `omp` with an offscreen Qt platform; it is skipped when PySide6 is not importable, so run it with a Python that has PySide6 and pytest.
 
 ## Project layout
 
